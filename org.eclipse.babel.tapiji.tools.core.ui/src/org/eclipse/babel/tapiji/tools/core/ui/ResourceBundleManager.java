@@ -61,7 +61,7 @@ public class ResourceBundleManager {
 	private static boolean checkResourceExclusionRoot;
 
 	/*** MEMBER SECTION ***/
-	private static Map<IProject, ResourceBundleManager> rbmanager = new HashMap<IProject, ResourceBundleManager>();
+	private static Map<IProject, ResourceBundleManager> rbmanagerByProject = new HashMap<IProject, ResourceBundleManager>();
 
 	// project-specific
 	private final Map<String, Set<IResource>> resources = new HashMap<String, Set<IResource>>();
@@ -86,10 +86,10 @@ public class ResourceBundleManager {
 			+ ".I18NBuilder";
 
 	/* Host project */
-	private IProject project = null;
+	private final IProject project;
 
 	/** State-Serialization Information **/
-	private static boolean state_loaded = false;
+	private static boolean state_loaded;
 
 	private static IStateLoader stateLoader;
 
@@ -114,6 +114,7 @@ public class ResourceBundleManager {
 	}
 
 	public static ResourceBundleManager getManager(IProject project) {
+        // TODO create factory for ResourceBundleManager with this method
 		// check if persistant state has been loaded
 		if (!state_loaded) {
 			IStateLoader stateLoader = getStateLoader();
@@ -131,10 +132,10 @@ public class ResourceBundleManager {
 			project = FragmentProjectUtils.getFragmentHost(project);
 		}
 
-		ResourceBundleManager manager = rbmanager.get(project);
+		ResourceBundleManager manager = rbmanagerByProject.get(project);
 		if (manager == null) {
 			manager = new ResourceBundleManager(project);
-			rbmanager.put(project, manager);
+			rbmanagerByProject.put(project, manager);
 			manager.detectResourceBundles();
 		}
 		return manager;
@@ -256,13 +257,14 @@ public class ResourceBundleManager {
 	}
 
 	private void detectResourceBundles() {
+	    // TODO create factory for ResourceBundleManager with this method
 		try {
-			project.accept(new ResourceBundleDetectionVisitor(getProject()));
+			project.accept(new ResourceBundleDetectionVisitor(project));
 
 			IProject[] fragments = FragmentProjectUtils.lookupFragment(project);
 			if (fragments != null) {
 				for (IProject p : fragments) {
-					p.accept(new ResourceBundleDetectionVisitor(getProject()));
+					p.accept(new ResourceBundleDetectionVisitor(project));
 				}
 			}
 		} catch (CoreException e) {
@@ -288,6 +290,7 @@ public class ResourceBundleManager {
 	}
 
 	private static Set<IProject> getAllSupportedProjects() {
+        // TODO create factory for ResourceBundleManager with this method
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
 				.getProjects();
 		Set<IProject> projs = new HashSet<IProject>();
@@ -581,7 +584,8 @@ public class ResourceBundleManager {
 	}
 
 	public IFile getRandomFile(String bundleName) {
-		try {
+        // TODO move to RBManager
+	    try {
 			Collection<IMessagesBundle> messagesBundles = RBManager
 					.getInstance(project).getMessagesBundleGroup(bundleName)
 					.getMessagesBundles();
@@ -594,6 +598,7 @@ public class ResourceBundleManager {
 	}
 
 	public static ResourceBundleManager getManager(String projectName) {
+        // TODO create factory for ResourceBundleManager with this method
 		for (IProject p : getAllSupportedProjects()) {
 			if (p.getName().equalsIgnoreCase(projectName)) {
 				// check if the projectName is a fragment and return the manager
@@ -658,7 +663,7 @@ public class ResourceBundleManager {
 
 	public static void unregisterResourceExclusionListenerFromAllManagers(
 			IResourceExclusionListener excludedResource) {
-		for (ResourceBundleManager mgr : rbmanager.values()) {
+		for (ResourceBundleManager mgr : rbmanagerByProject.values()) {
 			mgr.unregisterResourceExclusionListener(excludedResource);
 		}
 	}
