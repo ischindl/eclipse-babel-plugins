@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.babel.core.message.manager.RBManager;
 import org.eclipse.babel.tapiji.tools.core.extensions.ILocation;
 import org.eclipse.babel.tapiji.tools.core.extensions.MarkerConstants;
 import org.eclipse.babel.tapiji.tools.core.model.SLLocation;
@@ -113,10 +114,8 @@ public class JavaResourceAuditor extends I18nResourceAuditor {
             int dataEnd = marker.getAttribute("bundleEnd", 0);
 
             IProject project = marker.getResource().getProject();
-            ResourceBundleManager manager = ResourceBundleManager
-                    .getManager(project);
 
-            if (manager.getResourceBundle(dataName) != null) {
+            if (RBManager.getInstance(project).getMessagesBundleGroup(dataName) != null) {
                 String key = marker.getAttribute("key", "");
 
                 resolutions.add(new CreateResourceBundleEntry(key, dataName));

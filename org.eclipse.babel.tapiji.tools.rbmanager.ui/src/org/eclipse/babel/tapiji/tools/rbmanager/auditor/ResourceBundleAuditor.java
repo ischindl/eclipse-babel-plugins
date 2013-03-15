@@ -117,7 +117,7 @@ public class ResourceBundleAuditor extends I18nRBAuditor {
     public void audit(String rbId, ResourceBundleManager rbmanager) {
         IConfiguration configuration = ConfigurationManager.getInstance()
                 .getConfiguration();
-        IMessagesBundleGroup bundlegroup = rbmanager.getResourceBundle(rbId);
+        IMessagesBundleGroup bundlegroup = RBManager.getInstance(rbmanager.getProject()).getMessagesBundleGroup(rbId);
         Collection<IResource> bundlefile = rbmanager.getResourceBundles(rbId);
         String[] keys = bundlegroup.getMessageKeys();
 

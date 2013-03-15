@@ -11,6 +11,7 @@
 package org.eclipse.babel.tapiji.tools.java.ui.refactoring;
 
 import org.eclipse.babel.core.message.IMessagesBundleGroup;
+import org.eclipse.babel.core.message.manager.RBManager;
 import org.eclipse.babel.core.refactoring.IRefactoringService;
 import org.eclipse.babel.tapiji.tools.core.ui.ResourceBundleManager;
 import org.eclipse.babel.tapiji.tools.core.ui.dialogs.KeyRefactoringDialog;
@@ -88,8 +89,6 @@ public class RefactoringService implements IRefactoringService {
                         metaData[2]);
             }
         } else { // it's a String (not Cal10n)
-            ResourceBundleManager manager = ResourceBundleManager
-                    .getManager(projectName);
             ResourceAuditVisitor visitor = new ResourceAuditVisitor(file,
                     projectName);
             cu.accept(visitor);
@@ -98,8 +97,8 @@ public class RefactoringService implements IRefactoringService {
             IRegion region = visitor.getKeyAt(new Long(selectionOffset));
             String bundleName = visitor.getBundleReference(region);
             if (bundleName != null) {
-                IMessagesBundleGroup resourceBundle = manager
-                        .getResourceBundle(bundleName);
+                IMessagesBundleGroup resourceBundle = RBManager.getInstance(projectName)
+                        .getMessagesBundleGroup(bundleName);
                 if (resourceBundle.containsKey(oldKey)) {
                     String resourceBundleId = resourceBundle
                             .getResourceBundleId();

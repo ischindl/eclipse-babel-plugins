@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.babel.core.message.IMessagesBundleGroup;
+import org.eclipse.babel.core.message.manager.RBManager;
 import org.eclipse.babel.tapiji.tools.core.Logger;
 import org.eclipse.babel.tapiji.tools.core.ui.ResourceBundleManager;
 import org.eclipse.babel.tapiji.tools.core.ui.builder.InternationalizationNature;
@@ -218,8 +219,8 @@ public class MessageCompletionProposalComputer implements
         List<ICompletionProposal> completions = new ArrayList<ICompletionProposal>();
         IRegion region = csav.getKeyAt(new Long(tokenOffset));
         String bundleName = csav.getBundleReference(region);
-        IMessagesBundleGroup bundleGroup = manager
-                .getResourceBundle(bundleName);
+        IMessagesBundleGroup bundleGroup = RBManager.getInstance(manager.getProject())
+                .getMessagesBundleGroup(bundleName);
 
         if (fullToken.length() > 0) {
             boolean hit = false;

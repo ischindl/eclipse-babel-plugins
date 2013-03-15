@@ -77,8 +77,8 @@ public class ResourceSelector extends Composite {
         ResourceBundleManager manager = ResourceBundleManager
                 .getManager(projectName);
 
-        IAbstractKeyTreeModel model = KeyTreeFactory.createModel(manager
-                .getResourceBundle(resourceBundle));
+        IAbstractKeyTreeModel model = KeyTreeFactory.createModel(RBManager.getInstance(projectName)
+                .getMessagesBundleGroup(resourceBundle));
         ResKeyTreeContentProvider contentProvider = (ResKeyTreeContentProvider) viewer
                 .getContentProvider();
         contentProvider.setProjectName(manager.getProject().getName());
@@ -97,8 +97,8 @@ public class ResourceSelector extends Composite {
     }
 
     protected void updateViewer(boolean updateContent) {
-        IMessagesBundleGroup group = ResourceBundleManager.getManager(
-                projectName).getResourceBundle(resourceBundle);
+        IMessagesBundleGroup group = RBManager.getInstance(
+                projectName).getMessagesBundleGroup(resourceBundle);
 
         if (group == null)
             return;
@@ -151,8 +151,8 @@ public class ResourceSelector extends Composite {
                             .iterator();
                     if (itSel.hasNext()) {
                         IKeyTreeNode selItem = itSel.next();
-                        IMessagesBundleGroup group = manager
-                                .getResourceBundle(resourceBundle);
+                        IMessagesBundleGroup group = RBManager.getInstance(projectName)
+                                .getMessagesBundleGroup(resourceBundle);
                         selectedKey = selItem.getMessageKey();
 
                         if (group == null)

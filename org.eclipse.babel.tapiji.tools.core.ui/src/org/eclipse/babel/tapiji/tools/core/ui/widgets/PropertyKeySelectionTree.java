@@ -247,8 +247,8 @@ public class PropertyKeySelectionTree extends Composite implements
 
     public void setTreeStructure() {
         IAbstractKeyTreeModel model = KeyTreeFactory
-                .createModel(ResourceBundleManager.getManager(projectName)
-                        .getResourceBundle(resourceBundle));
+                .createModel(RBManager.getInstance(projectName)
+                        .getMessagesBundleGroup(resourceBundle));
         if (treeViewer.getInput() == null) {
             treeViewer.setUseHashlookup(true);
         }
@@ -272,7 +272,6 @@ public class PropertyKeySelectionTree extends Composite implements
         contentProvider.setBundleId(resourceBundle);
 
         // init label provider
-        IMessagesBundleGroup group = manager.getResourceBundle(resourceBundle);
         labelProvider.setLocales(visibleLocales);
         if (treeViewer.getLabelProvider() != labelProvider)
             treeViewer.setLabelProvider(labelProvider);
@@ -369,8 +368,7 @@ public class PropertyKeySelectionTree extends Composite implements
                             String activeKey = vkti.getMessageKey();
 
                             if (activeKey != null) {
-                                IMessagesBundleGroup bundleGroup = manager
-                                        .getResourceBundle(resourceBundle);
+                                IMessagesBundleGroup bundleGroup = RBManager.getInstance(projectName).getMessagesBundleGroup(resourceBundle);
                                 IMessage entry = bundleGroup.getMessage(
                                         activeKey, l);
 

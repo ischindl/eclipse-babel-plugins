@@ -208,10 +208,6 @@ public class ResourceBundleManager {
 		RBManager.getInstance(project).deleteMessagesBundleGroup(name);
 	}
 
-	public IMessagesBundleGroup getResourceBundle(String name) {
-		return RBManager.getInstance(project).getMessagesBundleGroup(name);
-	}
-
 	public Collection<IResource> getResourceBundles(String bundleName) {
 		return resources.get(bundleName);
 	}
@@ -668,14 +664,9 @@ public class ResourceBundleManager {
 	}
 
 	public boolean isResourceExisting(String bundleId, String key) {
-		boolean keyExists = false;
-		IMessagesBundleGroup bGroup = getResourceBundle(bundleId);
-
-		if (bGroup != null) {
-			keyExists = bGroup.isKey(key);
-		}
-
-		return keyExists;
+	    // TODO move to RBManager
+		IMessagesBundleGroup bGroup = RBManager.getInstance(project).getMessagesBundleGroup(bundleId);
+		return bGroup != null &&  bGroup.isKey(key);
 	}
 
 	public Set<Locale> getProjectProvidedLocales() {
