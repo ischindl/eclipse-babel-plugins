@@ -273,6 +273,7 @@ public class ResourceBundleManager {
 				}
 			}
 		} catch (CoreException e) {
+		    // TODO no empty catch suckers
 		}
 	}
 
@@ -309,31 +310,6 @@ public class ResourceBundleManager {
 			}
 		}
 		return projs;
-	}
-
-	public String getKeyHoverString(String rbName, String key) {
-		try {
-			RBManager instance = RBManager.getInstance(project);
-			IMessagesBundleGroup bundleGroup = instance
-					.getMessagesBundleGroup(rbName);
-			if (!bundleGroup.containsKey(key)) {
-				return null;
-			}
-
-			String hoverText = "<html><head></head><body>";
-
-			for (IMessage message : bundleGroup.getMessages(key)) {
-				String displayName = message.getLocale() == null ? "Default"
-						: message.getLocale().getDisplayName();
-				String value = message.getValue();
-				hoverText += "<b><i>" + displayName + "</i></b><br/>"
-						+ value.replace("\n", "<br/>") + "<br/><br/>";
-			}
-			return hoverText + "</body></html>";
-		} catch (Exception e) {
-			// silent catch
-			return "";
-		}
 	}
 
 	private boolean excludeSingleResource(IResource res) {

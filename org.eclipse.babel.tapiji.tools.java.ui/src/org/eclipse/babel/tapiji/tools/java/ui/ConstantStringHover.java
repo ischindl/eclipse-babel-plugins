@@ -10,9 +10,13 @@
  ******************************************************************************/
 package org.eclipse.babel.tapiji.tools.java.ui;
 
+import org.eclipse.babel.core.message.IMessage;
+import org.eclipse.babel.core.message.IMessagesBundleGroup;
+import org.eclipse.babel.core.message.manager.RBManager;
 import org.eclipse.babel.tapiji.tools.core.ui.ResourceBundleManager;
 import org.eclipse.babel.tapiji.tools.java.ui.util.ASTutilsUI;
 import org.eclipse.babel.tapiji.tools.java.visitor.ResourceAuditVisitor;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.ui.JavaUI;
@@ -25,7 +29,7 @@ public class ConstantStringHover implements IJavaEditorTextHover {
 
     IEditorPart editor = null;
     ResourceAuditVisitor csf = null;
-    ResourceBundleManager manager = null;
+    IProject project;
 
     @Override
     public void setEditor(IEditorPart editor) {
@@ -50,11 +54,11 @@ public class ConstantStringHover implements IJavaEditorTextHover {
             return;
         }
 
-        manager = ResourceBundleManager.getManager(cu.getJavaElement()
-                .getResource().getProject());
+        project = cu.getJavaElement()
+                .getResource().getProject();
 
         // determine the element at the position of the cursur
-        csf = new ResourceAuditVisitor(null, manager.getProject().getName());
+        csf = new ResourceAuditVisitor(null, project.getName());
         cu.accept(csf);
     }
 
@@ -75,11 +79,36 @@ public class ConstantStringHover implements IJavaEditorTextHover {
         String bundleName = csf.getBundleReference(hoverRegion);
         String key = csf.getKeyAt(hoverRegion);
 
-        String hoverText = manager.getKeyHoverString(bundleName, key);
+        String hoverText = getKeyHoverString(bundleName, key);
         if (hoverText == null || hoverText.equals("")) {
             return null;
         } else {
             return hoverText;
+        }
+    }
+
+    private String getKeyHoverString(String rbName, String key) {
+        try {
+            RBManager instance = RBManager.getInstance(project);
+            IMessagesBundleGroup bundleGroup = instance
+                    .getMessagesBundleGroup(rbName);
+            if (!bundleGroup.containsKey(key)) {
+                return null;
+            }
+
+            String hoverText = "<html><head></head><body>";
+
+            for (IMessage message : bundleGroup.getMessages(key)) {
+                String displayName = message.getLocale() == null ? "Default"
+                        : message.getLocale().getDisplayName();
+                String value = message.getValue();
+                hoverText += "<b><i>" + displayName + "</i></b><br/>"
+                        + value.replace("\n", "<br/>") + "<br/><br/>";
+            }
+            return hoverText + "</body></html>";
+        } catch (Exception e) {
+            // silent catch
+            return "";
         }
     }
 
