@@ -372,9 +372,6 @@ public class CreateResourceBundleEntryDialog extends TitleAreaDialog {
     @Override
     protected void okPressed() {
         super.okPressed();
-        // TODO debug
-        ResourceBundleManager manager = ResourceBundleManager
-                .getManager(projectName);
         // Insert new Resource-Bundle reference
         Locale locale = LocaleUtils.getLocaleByDisplayName(
                 RBManager.getInstance(projectName).getProvidedLocales(selectedRB), selectedLocale); // new
@@ -383,7 +380,7 @@ public class CreateResourceBundleEntryDialog extends TitleAreaDialog {
         // retrieve
         // locale
 
-        manager.addResourceBundleEntry(selectedRB, selectedKey, locale,
+        RBManager.getInstance(projectName).addResourceBundleEntry(selectedRB, selectedKey, locale,
                 selectedDefaultText);
     }
 

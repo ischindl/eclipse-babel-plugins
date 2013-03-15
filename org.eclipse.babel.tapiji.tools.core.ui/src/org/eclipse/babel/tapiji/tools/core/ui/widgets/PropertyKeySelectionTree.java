@@ -751,9 +751,7 @@ public class PropertyKeySelectionTree extends Composite implements
         }
 
         try {
-            ResourceBundleManager manager = ResourceBundleManager
-                    .getManager(projectName);
-            manager.removeResourceBundleEntry(getResourceBundle(), keys);
+            RBManager.getInstance(projectName).removeResourceBundleEntry(getResourceBundle(), keys);
         } catch (Exception ex) {
             Logger.logError(ex);
         }

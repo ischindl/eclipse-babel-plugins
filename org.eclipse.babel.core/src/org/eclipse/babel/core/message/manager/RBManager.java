@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.babel.core.configuration.DirtyHack;
+import org.eclipse.babel.core.factory.MessageFactory;
 import org.eclipse.babel.core.factory.MessagesBundleGroupFactory;
 import org.eclipse.babel.core.message.IMessage;
 import org.eclipse.babel.core.message.IMessagesBundle;
@@ -604,6 +605,51 @@ public final class RBManager {
     public boolean existsKeyIn(String rbName, String key) {
         IMessagesBundleGroup group = getMessagesBundleGroup(rbName);
         return group != null && group.containsKey(key);
+    }
+    
+    public void addResourceBundleEntry(String resourceBundleId, String key,
+            Locale locale, String message) {
+
+        IMessagesBundleGroup bundleGroup = getMessagesBundleGroup(resourceBundleId);
+        IMessage entry = bundleGroup.getMessage(key, locale);
+
+        if (entry == null) {
+            DirtyHack.setFireEnabled(false);
+
+            IMessagesBundle messagesBundle = bundleGroup
+                    .getMessagesBundle(locale);
+            IMessage m = MessageFactory.createMessage(key, locale);
+            m.setText(message);
+            messagesBundle.addMessage(m);
+
+            FileUtils.writeToFile(messagesBundle);
+            fireResourceChanged(messagesBundle);
+
+            DirtyHack.setFireEnabled(true);
+
+            // notify the PropertyKeySelectionTree
+            fireEditorChanged();
+        }
+    }
+
+    public void removeResourceBundleEntry(String resourceBundleId,
+            List<String> keys) {
+
+        IMessagesBundleGroup messagesBundleGroup = 
+                getMessagesBundleGroup(resourceBundleId);
+
+        DirtyHack.setFireEnabled(false);
+
+        for (String key : keys) {
+            messagesBundleGroup.removeMessages(key);
+        }
+
+        writeToFile(messagesBundleGroup);
+
+        DirtyHack.setFireEnabled(true);
+
+        // notify the PropertyKeySelectionTree
+        fireEditorChanged();
     }
 
 }
