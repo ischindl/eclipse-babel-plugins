@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.eclipse.babel.core.message.manager.RBManager;
 import org.eclipse.babel.tapiji.tools.core.model.SLLocation;
 import org.eclipse.babel.tapiji.tools.core.ui.ResourceBundleManager;
 import org.eclipse.babel.tapiji.tools.java.util.ASTutils;
@@ -117,9 +118,10 @@ public class ResourceAuditVisitor extends ASTVisitor implements
                     SLLocation rbName = ASTutils.resolveResourceBundleLocation(
                             methodInvocation, ASTutils.getRBDefinitionDesc(),
                             variableBindingManagers);
-                    if (rbName == null
-                            || manager.isKeyBroken(rbName.getLiteral(),
-                                    stringLiteral.getLiteralValue())) {
+                    boolean missingBundleOrUnknownKey = rbName == null
+                            || !RBManager.getInstance(projectName).existsKeyIn(rbName.getLiteral(),
+                                    stringLiteral.getLiteralValue());
+                    if (missingBundleOrUnknownKey) {
                         // report new problem
                         SLLocation desc = new SLLocation(file,
                                 stringLiteral.getStartPosition(),

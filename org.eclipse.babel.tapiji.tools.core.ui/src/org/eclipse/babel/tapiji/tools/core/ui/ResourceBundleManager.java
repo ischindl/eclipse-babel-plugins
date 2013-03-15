@@ -61,24 +61,24 @@ public class ResourceBundleManager {
 	public static String defaultLocaleTag = "[default]"; // TODO externalize
 
 	/*** CONFIG SECTION ***/
-	private static boolean checkResourceExclusionRoot = false;
+	private static boolean checkResourceExclusionRoot;
 
 	/*** MEMBER SECTION ***/
 	private static Map<IProject, ResourceBundleManager> rbmanager = new HashMap<IProject, ResourceBundleManager>();
 
 	// project-specific
-	private Map<String, Set<IResource>> resources = new HashMap<String, Set<IResource>>();
+	private final Map<String, Set<IResource>> resources = new HashMap<String, Set<IResource>>();
 
-	private Map<String, String> bundleNames = new HashMap<String, String>();
+	private final Map<String, String> bundleNames = new HashMap<String, String>();
 
-	private Map<String, List<IResourceBundleChangedListener>> listeners = new HashMap<String, List<IResourceBundleChangedListener>>();
+	private final Map<String, List<IResourceBundleChangedListener>> listeners = new HashMap<String, List<IResourceBundleChangedListener>>();
 
-	private List<IResourceExclusionListener> exclusionListeners = new ArrayList<IResourceExclusionListener>();
+	private final List<IResourceExclusionListener> exclusionListeners = new ArrayList<IResourceExclusionListener>();
 
 	// global
 	private static Set<IResourceDescriptor> excludedResources = new HashSet<IResourceDescriptor>();
 
-	private static Map<String, Set<IResource>> allBundles = new HashMap<String, Set<IResource>>();
+	private static final Map<String, Set<IResource>> allBundles = new HashMap<String, Set<IResource>>();
 
 	// private static IResourceChangeListener changelistener; //
 	// RBChangeListener -> see stateLoader!
@@ -208,13 +208,11 @@ public class ResourceBundleManager {
 	}
 
 	private void unloadResourceBundle(String name) {
-		RBManager instance = RBManager.getInstance(project);
-		instance.deleteMessagesBundleGroup(name);
+		RBManager.getInstance(project).deleteMessagesBundleGroup(name);
 	}
 
 	public IMessagesBundleGroup getResourceBundle(String name) {
-		RBManager instance = RBManager.getInstance(project);
-		return instance.getMessagesBundleGroup(name);
+		return RBManager.getInstance(project).getMessagesBundleGroup(name);
 	}
 
 	public Collection<IResource> getResourceBundles(String bundleName) {
@@ -336,20 +334,6 @@ public class ResourceBundleManager {
 			// silent catch
 			return "";
 		}
-	}
-
-	public boolean isKeyBroken(String rbName, String key) {
-		IMessagesBundleGroup messagesBundleGroup = RBManager.getInstance(
-				project).getMessagesBundleGroup(rbName);
-		if (messagesBundleGroup == null) {
-			return true;
-		} else {
-			return !messagesBundleGroup.containsKey(key);
-		}
-
-		// if (!resourceBundles.containsKey(rbName))
-		// return true;
-		// return !this.isResourceExisting(rbName, key);
 	}
 
 	private boolean excludeSingleResource(IResource res) {

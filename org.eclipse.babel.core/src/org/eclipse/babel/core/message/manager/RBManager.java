@@ -600,4 +600,10 @@ public final class RBManager {
         }
         return locales;
     }
+
+    public boolean existsKeyIn(String rbName, String key) {
+        IMessagesBundleGroup group = getMessagesBundleGroup(rbName);
+        return group != null && group.containsKey(key);
+    }
+
 }
