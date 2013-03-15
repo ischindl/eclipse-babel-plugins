@@ -20,7 +20,8 @@ import org.eclipse.babel.core.message.strategy.PropertiesFileGroupStrategy;
 
 /**
  * Interface, implemented by {@link MessagesBundleGroup}. A messages bundle
- * group is an abstraction of a group of resource bundles. <br>
+ * group is an abstraction of a group of resource bundles of different 
+ * languages for the same property names (keys in propery file). <br>
  * <br>
  * 
  * @author Martin Reiterer, Alexej Strelzow

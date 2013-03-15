@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.StringBufferInputStream;
 import java.util.Locale;
 
+import org.eclipse.babel.core.message.manager.RBManager;
 import org.eclipse.babel.core.message.resource.ser.PropertiesSerializer;
 import org.eclipse.babel.tapiji.tools.core.Logger;
 import org.eclipse.babel.tapiji.tools.core.ui.ResourceBundleManager;
@@ -65,7 +66,7 @@ public class LanguageUtils {
         ResourceBundleManager rbManager = ResourceBundleManager
                 .getManager(project);
 
-        if (rbManager.getProvidedLocales(rbId).contains(locale)) {
+        if (RBManager.getInstance(project).getProvidedLocales(rbId).contains(locale)) {
             return;
         }
 

@@ -41,18 +41,18 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
 
 /**
- * Manages all {@link MessagesBundleGroup}s. That is: <li>Hold map with projects
- * and their RBManager (1 RBManager per project)</li> <li>Hold up-to-date map
- * with resource bundles (= {@link MessagesBundleGroup})</li> <li>Hold
- * {@link IMessagesEditorListener}, which can be used to keep systems in sync</li>
- * <br>
- * <br>
+ * Manages all {@link MessagesBundleGroup}s. That is:
+ * <ul>
+ * <li>Hold map with projects and their RBManager (1 RBManager per project)</li>
+ * <li>Hold up-to-date map with resource bundles (= {@link MessagesBundleGroup})</li>
+ * <li>Hold {@link IMessagesEditorListener}, which can be used to keep systems in sync</li>
+ * </ul>
  * 
  * @author Alexej Strelzow
  */
 public final class RBManager {
 
-    private static Map<IProject, RBManager> managerMap = new HashMap<IProject, RBManager>();
+    private static final Map<IProject, RBManager> managerMap = new HashMap<IProject, RBManager>();
 
     /** <package>.<resourceBundleName> , IMessagesBundleGroup */
     private final Map<String, IMessagesBundleGroup> resourceBundles;
@@ -67,7 +67,7 @@ public final class RBManager {
 
     private static final String TAPIJI_NATURE = "org.eclipse.babel.tapiji.tools.core.ui.nature";
 
-    final static Logger logger = Logger.getLogger(RBManager.class.getName());
+    private static final Logger logger = Logger.getLogger(RBManager.class.getName());
 
     private static IRefactoringService refactorService;
 
@@ -586,5 +586,18 @@ public final class RBManager {
 
     public static IRefactoringService getRefactorService() {
         return refactorService;
+    }
+
+    public Set<Locale> getProvidedLocales(String bundleName) {
+        Set<Locale> locales = new HashSet<Locale>();
+        IMessagesBundleGroup group = getMessagesBundleGroup(bundleName);
+        if (group == null) {
+            return locales;
+        }
+
+        for (IMessagesBundle bundle : group.getMessagesBundles()) {
+            locales.add(bundle.getLocale());
+        }
+        return locales;
     }
 }

@@ -33,7 +33,6 @@ import org.eclipse.babel.tapiji.tools.core.model.IResourceBundleChangedListener;
 import org.eclipse.babel.tapiji.tools.core.model.IResourceDescriptor;
 import org.eclipse.babel.tapiji.tools.core.model.IResourceExclusionListener;
 import org.eclipse.babel.tapiji.tools.core.model.ResourceDescriptor;
-import org.eclipse.babel.tapiji.tools.core.model.exception.ResourceBundleException;
 import org.eclipse.babel.tapiji.tools.core.model.manager.IStateLoader;
 import org.eclipse.babel.tapiji.tools.core.model.manager.ResourceBundleChangedEvent;
 import org.eclipse.babel.tapiji.tools.core.model.manager.ResourceExclusionEvent;
@@ -66,8 +65,6 @@ public class ResourceBundleManager {
 
 	/*** MEMBER SECTION ***/
 	private static Map<IProject, ResourceBundleManager> rbmanager = new HashMap<IProject, ResourceBundleManager>();
-
-	public static final String RESOURCE_BUNDLE_EXTENSION = ".properties";
 
 	// project-specific
 	private Map<String, Set<IResource>> resources = new HashMap<String, Set<IResource>>();
@@ -106,17 +103,11 @@ public class ResourceBundleManager {
 		RBManager.getInstance(project).addResourceDeltaListener(
 				new IResourceDeltaListener() {
 
-					/**
-					 * {@inheritDoc}
-					 */
 					@Override
 					public void onDelete(IMessagesBundleGroup bundleGroup) {
 						resources.remove(bundleGroup.getResourceBundleId());
 					}
 
-					/**
-					 * {@inheritDoc}
-					 */
 					@Override
 					public void onDelete(String resourceBundleId,
 							IResource resource) {
@@ -152,22 +143,6 @@ public class ResourceBundleManager {
 		return manager;
 	}
 
-	public Set<Locale> getProvidedLocales(String bundleName) {
-		RBManager instance = RBManager.getInstance(project);
-
-		Set<Locale> locales = new HashSet<Locale>();
-		IMessagesBundleGroup group = instance
-				.getMessagesBundleGroup(bundleName);
-		if (group == null) {
-			return locales;
-		}
-
-		for (IMessagesBundle bundle : group.getMessagesBundles()) {
-			locales.add(bundle.getLocale());
-		}
-		return locales;
-	}
-
 	public static String getResourceBundleName(IResource res) {
 		String name = res.getName();
 		String regex = "^(.*?)" //$NON-NLS-1$
@@ -177,12 +152,7 @@ public class ResourceBundleManager {
 		return name.replaceFirst(regex, "$1"); //$NON-NLS-1$
 	}
 
-	protected boolean isResourceBundleLoaded(String bundleName) {
-		return RBManager.getInstance(project).containsMessagesBundleGroup(
-				bundleName);
-	}
-
-	protected void unloadResource(String bundleName, IResource resource) {
+	private void unloadResource(String bundleName, IResource resource) {
 		// TODO implement more efficient
 		unloadResourceBundle(bundleName);
 		// loadResourceBundle(bundleName);
@@ -237,14 +207,7 @@ public class ResourceBundleManager {
 		this.fireResourceBundleChangedEvent(bundleName, event);
 	}
 
-	protected void removeAllBundleResources(String bundleName) {
-		unloadResourceBundle(bundleName);
-		resources.remove(bundleName);
-		// allBundles.remove(bundleName);
-		listeners.remove(bundleName);
-	}
-
-	public void unloadResourceBundle(String name) {
+	private void unloadResourceBundle(String name) {
 		RBManager instance = RBManager.getInstance(project);
 		instance.deleteMessagesBundleGroup(name);
 	}
@@ -268,23 +231,7 @@ public class ResourceBundleManager {
 		return returnList;
 	}
 
-	public IResource getResourceFile(String file) {
-		String regex = "^(.*?)" + "((_[a-z]{2,3})|(_[a-z]{2,3}_[A-Z]{2})"
-				+ "|(_[a-z]{2,3}_[A-Z]{2}_\\w*))?(\\." + "properties" + ")$";
-		String bundleName = file.replaceFirst(regex, "$1");
-		IResource resource = null;
-
-		for (IResource res : resources.get(bundleName)) {
-			if (res.getName().equalsIgnoreCase(file)) {
-				resource = res;
-				break;
-			}
-		}
-
-		return resource;
-	}
-
-	public void fireResourceBundleChangedEvent(String bundleName,
+	private void fireResourceBundleChangedEvent(String bundleName,
 			ResourceBundleChangedEvent event) {
 		List<IResourceBundleChangedListener> l = listeners.get(bundleName);
 
@@ -317,7 +264,7 @@ public class ResourceBundleManager {
 		listeners.put(bundleName, l);
 	}
 
-	protected void detectResourceBundles() {
+	private void detectResourceBundles() {
 		try {
 			project.accept(new ResourceBundleDetectionVisitor(getProject()));
 
@@ -348,22 +295,7 @@ public class ResourceBundleManager {
 		return returnList;
 	}
 
-	public static List<String> getAllResourceBundleNames() {
-		List<String> returnList = new ArrayList<String>();
-
-		for (IProject p : getAllSupportedProjects()) {
-			if (!FragmentProjectUtils.isFragment(p)) {
-				Iterator<String> it = getManager(p).resources.keySet()
-						.iterator();
-				while (it.hasNext()) {
-					returnList.add(p.getName() + "/" + it.next());
-				}
-			}
-		}
-		return returnList;
-	}
-
-	public static Set<IProject> getAllSupportedProjects() {
+	private static Set<IProject> getAllSupportedProjects() {
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
 				.getProjects();
 		Set<IProject> projs = new HashSet<IProject>();
@@ -469,7 +401,7 @@ public class ResourceBundleManager {
 			res.accept(new IResourceVisitor() {
 
 				@Override
-				public boolean visit(IResource resource) throws CoreException {
+				public boolean visit(IResource resource) {
 					Logger.logInfo("Excluding resource '"
 							+ resource.getFullPath().toOSString() + "'");
 					resourceSubTree.add(resource);
@@ -526,8 +458,7 @@ public class ResourceBundleManager {
 				res.accept(new IResourceVisitor() {
 
 					@Override
-					public boolean visit(IResource resource)
-							throws CoreException {
+					public boolean visit(IResource resource) {
 						if (excludedResources.contains(new ResourceDescriptor(
 								resource))) {
 							// check if the changed resource is a resource
@@ -566,8 +497,7 @@ public class ResourceBundleManager {
 						parentResource.accept(new IResourceVisitor() {
 
 							@Override
-							public boolean visit(IResource resource)
-									throws CoreException {
+							public boolean visit(IResource resource) {
 								if (excludedResources
 										.contains(new ResourceDescriptor(
 												resource))
@@ -581,7 +511,7 @@ public class ResourceBundleManager {
 
 						if (childResources.size() == 0) {
 							excludedResources.remove(new ResourceDescriptor(
-									(IResource) parentResource));
+									parentResource));
 							changedResources.add(parentResource);
 							monitor.worked(1);
 						}
@@ -652,7 +582,7 @@ public class ResourceBundleManager {
 		}
 	}
 
-	protected void fireResourceExclusionEvent(ResourceExclusionEvent event) {
+	private void fireResourceExclusionEvent(ResourceExclusionEvent event) {
 		for (IResourceExclusionListener listener : exclusionListeners) {
 			listener.exclusionChanged(event);
 		}
@@ -710,19 +640,6 @@ public class ResourceBundleManager {
 		return null;
 	}
 
-	@Deprecated
-	protected static boolean isResourceExcluded(IProject project, String bname) {
-		Iterator<IResourceDescriptor> itExcl = excludedResources.iterator();
-		while (itExcl.hasNext()) {
-			IResourceDescriptor rd = itExcl.next();
-			if (project.getName().equals(rd.getProjectName())
-					&& bname.equals(rd.getBundleId())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public static ResourceBundleManager getManager(String projectName) {
 		for (IProject p : getAllSupportedProjects()) {
 			if (p.getName().equalsIgnoreCase(projectName)) {
@@ -776,7 +693,7 @@ public class ResourceBundleManager {
 		exclusionListeners.add(listener);
 	}
 
-	public void unregisterResourceExclusionListener(
+	private void unregisterResourceExclusionListener(
 			IResourceExclusionListener listener) {
 		exclusionListeners.remove(listener);
 	}
@@ -794,7 +711,7 @@ public class ResourceBundleManager {
 	}
 
 	public void addResourceBundleEntry(String resourceBundleId, String key,
-			Locale locale, String message) throws ResourceBundleException {
+			Locale locale, String message) {
 
 		RBManager instance = RBManager.getInstance(project);
 		IMessagesBundleGroup bundleGroup = instance
@@ -820,14 +737,8 @@ public class ResourceBundleManager {
 		}
 	}
 
-	public void saveResourceBundle(String resourceBundleId,
-			IMessagesBundleGroup newBundleGroup) throws ResourceBundleException {
-
-		// RBManager.getInstance().
-	}
-
 	public void removeResourceBundleEntry(String resourceBundleId,
-			List<String> keys) throws ResourceBundleException {
+			List<String> keys) {
 
 		RBManager instance = RBManager.getInstance(project);
 		IMessagesBundleGroup messagesBundleGroup = instance
@@ -858,19 +769,11 @@ public class ResourceBundleManager {
 		return keyExists;
 	}
 
-	public static void rebuildProject(IResource resource) {
-		try {
-			resource.touch(null);
-		} catch (CoreException e) {
-			Logger.logError(e);
-		}
-	}
-
 	public Set<Locale> getProjectProvidedLocales() {
 		Set<Locale> locales = new HashSet<Locale>();
 
 		for (String bundleId : getResourceBundleNames()) {
-			Set<Locale> rb_l = getProvidedLocales(bundleId);
+			Set<Locale> rb_l = RBManager.getInstance(project).getProvidedLocales(bundleId);
 			if (!rb_l.isEmpty()) {
 				Object[] bundlelocales = rb_l.toArray();
 				for (Object l : bundlelocales) {
@@ -887,7 +790,7 @@ public class ResourceBundleManager {
 		return locales;
 	}
 
-	public static IStateLoader getStateLoader() {
+	private static IStateLoader getStateLoader() {
 		if (stateLoader == null) {
 
 			IExtensionPoint extp = Platform.getExtensionRegistry()
@@ -910,7 +813,7 @@ public class ResourceBundleManager {
 
 	}
 
-	public static void saveManagerState() {
+	static void saveManagerState() {
 		IStateLoader stateLoader = getStateLoader();
 		if (stateLoader != null) {
 			stateLoader.saveState();

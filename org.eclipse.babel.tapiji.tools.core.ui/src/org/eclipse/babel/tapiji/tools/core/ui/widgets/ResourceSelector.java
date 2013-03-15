@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.babel.core.message.IMessagesBundleGroup;
+import org.eclipse.babel.core.message.manager.RBManager;
 import org.eclipse.babel.core.message.tree.IAbstractKeyTreeModel;
 import org.eclipse.babel.core.message.tree.IKeyTreeNode;
 import org.eclipse.babel.core.message.tree.TreeType;
@@ -156,7 +157,7 @@ public class ResourceSelector extends Composite {
 
                         if (group == null)
                             return;
-                        Iterator<Locale> itLocales = manager
+                        Iterator<Locale> itLocales = RBManager.getInstance(projectName)
                                 .getProvidedLocales(resourceBundle).iterator();
                         while (itLocales.hasNext()) {
                             Locale l = itLocales.next();

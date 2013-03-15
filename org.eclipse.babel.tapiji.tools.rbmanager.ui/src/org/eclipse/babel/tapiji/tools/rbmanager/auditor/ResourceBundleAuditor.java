@@ -27,6 +27,7 @@ import org.eclipse.babel.core.configuration.ConfigurationManager;
 import org.eclipse.babel.core.configuration.IConfiguration;
 import org.eclipse.babel.core.message.IMessage;
 import org.eclipse.babel.core.message.IMessagesBundleGroup;
+import org.eclipse.babel.core.message.manager.RBManager;
 import org.eclipse.babel.tapiji.tools.core.extensions.ILocation;
 import org.eclipse.babel.tapiji.tools.core.extensions.MarkerConstants;
 import org.eclipse.babel.tapiji.tools.core.ui.ResourceBundleManager;
@@ -144,7 +145,7 @@ public class ResourceBundleAuditor extends I18nRBAuditor {
 
         if (configuration.getAuditMissingLanguage()) {
             // checks if the resourcebundle supports all project-languages
-            Set<Locale> rbLocales = rbmanager.getProvidedLocales(rbId);
+            Set<Locale> rbLocales = RBManager.getInstance(rbmanager.getProject()).getProvidedLocales(rbId);
             Set<Locale> projectLocales = rbmanager.getProjectProvidedLocales();
 
             auditMissingLanguage(rbLocales, projectLocales, rbmanager, rbId);

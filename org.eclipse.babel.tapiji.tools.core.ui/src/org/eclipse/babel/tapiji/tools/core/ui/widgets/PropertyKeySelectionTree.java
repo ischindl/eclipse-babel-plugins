@@ -283,12 +283,10 @@ public class PropertyKeySelectionTree extends Composite implements
 
     protected void initVisibleLocales() {
         SortedMap<String, Locale> locSorted = new TreeMap<String, Locale>();
-        ResourceBundleManager manager = ResourceBundleManager
-                .getManager(projectName);
         sortInfo = new SortInfo();
         visibleLocales.clear();
         if (resourceBundle != null) {
-            for (Locale l : manager.getProvidedLocales(resourceBundle)) {
+            for (Locale l : RBManager.getInstance(projectName).getProvidedLocales(resourceBundle)) {
                 if (l == null) {
                     locSorted.put("Default", null);
                 } else {

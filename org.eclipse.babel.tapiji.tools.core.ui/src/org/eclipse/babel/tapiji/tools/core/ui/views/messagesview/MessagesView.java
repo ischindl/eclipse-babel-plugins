@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.babel.core.message.manager.RBManager;
 import org.eclipse.babel.tapiji.tools.core.Logger;
 import org.eclipse.babel.tapiji.tools.core.model.IResourceBundleChangedListener;
 import org.eclipse.babel.tapiji.tools.core.model.manager.ResourceBundleChangedEvent;
@@ -282,9 +283,8 @@ public class MessagesView extends ViewPart implements
         }
 
         visibleLocaleActions = new ArrayList<Action>();
-        Set<Locale> locales = ResourceBundleManager.getManager(
-                viewState.getSelectedProjectName()).getProvidedLocales(
-                viewState.getSelectedBundleId());
+        Set<Locale> locales = RBManager.getInstance(
+        viewState.getSelectedProjectName()).getProvidedLocales(viewState.getSelectedBundleId());
         List<Locale> visibleLocales = treeViewer.getVisibleLocales();
         for (final Locale locale : locales) {
             Action langAction = new Action() {

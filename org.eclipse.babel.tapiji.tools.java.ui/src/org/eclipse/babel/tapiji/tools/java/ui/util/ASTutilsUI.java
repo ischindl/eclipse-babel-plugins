@@ -341,7 +341,7 @@ public class ASTutilsUI {
 		} else {
 			IMessagesBundle messagesBundle = messagesBundleGroup
 					.getMessagesBundle(LocaleUtils.getLocaleByDisplayName(
-							manager.getProvidedLocales(resourceBundleId),
+							RBManager.getInstance(projectName).getProvidedLocales(resourceBundleId),
 							selectedLocale));
 			messagesBundle.renameMessageKey(oldKey, newKey);
 			// rbManager.fireResourceChanged(messagesBundle); ??

@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.babel.core.message.manager.RBManager;
 import org.eclipse.babel.tapiji.tools.core.Logger;
 import org.eclipse.babel.tapiji.tools.core.model.exception.ResourceBundleException;
 import org.eclipse.babel.tapiji.tools.core.ui.ResourceBundleManager;
@@ -217,10 +218,10 @@ public class CreateResourceBundleEntryDialog extends TitleAreaDialog {
                 .getManager(projectName);
 
         // Retrieve available locales for the selected resource-bundle
-        Set<Locale> locales = manager.getProvidedLocales(selectedBundle);
+        Set<Locale> locales = RBManager.getInstance(projectName).getProvidedLocales(selectedBundle);
         int index = 0;
         int iSel = -1;
-        for (Locale l : manager.getProvidedLocales(selectedBundle)) {
+        for (Locale l : RBManager.getInstance(projectName).getProvidedLocales(selectedBundle)) {
             String displayName = l == null ? ResourceBundleManager.defaultLocaleTag
                     : l.getDisplayName();
             if (displayName.equals(selectedLocale))
@@ -376,18 +377,14 @@ public class CreateResourceBundleEntryDialog extends TitleAreaDialog {
                 .getManager(projectName);
         // Insert new Resource-Bundle reference
         Locale locale = LocaleUtils.getLocaleByDisplayName(
-                manager.getProvidedLocales(selectedRB), selectedLocale); // new
+                RBManager.getInstance(projectName).getProvidedLocales(selectedRB), selectedLocale); // new
         // Locale("");
         // //
         // retrieve
         // locale
 
-        try {
-            manager.addResourceBundleEntry(selectedRB, selectedKey, locale,
-                    selectedDefaultText);
-        } catch (ResourceBundleException e) {
-            Logger.logError(e);
-        }
+        manager.addResourceBundleEntry(selectedRB, selectedKey, locale,
+                selectedDefaultText);
     }
 
     @Override
@@ -416,7 +413,7 @@ public class CreateResourceBundleEntryDialog extends TitleAreaDialog {
         ResourceBundleManager manager = ResourceBundleManager
                 .getManager(projectName);
         boolean localeValid = LocaleUtils.containsLocaleByDisplayName(
-                manager.getProvidedLocales(selectedRB), selectedLocale);
+                RBManager.getInstance(projectName).getProvidedLocales(selectedRB), selectedLocale);
 
         for (String rbId : manager.getResourceBundleNames()) {
             if (rbId.equals(selectedRB)) {

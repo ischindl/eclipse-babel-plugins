@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.babel.core.message.manager.RBManager;
 import org.eclipse.babel.tapiji.tools.core.Logger;
 import org.eclipse.babel.tapiji.tools.core.ui.Activator;
 import org.eclipse.babel.tapiji.tools.core.ui.ResourceBundleManager;
@@ -145,7 +146,7 @@ public class RBFileUtils extends Action {
         ResourceBundleManager rbManager = ResourceBundleManager
                 .getManager(project);
 
-        if (!rbManager.getProvidedLocales(rbId).contains(locale)) {
+        if (!RBManager.getInstance(project).getProvidedLocales(rbId).contains(locale)) {
             return;
         }
 

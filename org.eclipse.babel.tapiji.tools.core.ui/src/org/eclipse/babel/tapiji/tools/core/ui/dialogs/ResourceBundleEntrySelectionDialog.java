@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.babel.core.message.manager.RBManager;
 import org.eclipse.babel.tapiji.tools.core.ui.ResourceBundleManager;
 import org.eclipse.babel.tapiji.tools.core.ui.widgets.ResourceSelector;
 import org.eclipse.babel.tapiji.tools.core.ui.widgets.event.ResourceSelectionEvent;
@@ -150,8 +151,7 @@ public class ResourceBundleEntrySelectionDialog extends TitleAreaDialog {
             return;
 
         // Retrieve available locales for the selected resource-bundle
-        Set<Locale> locales = ResourceBundleManager.getManager(projectName)
-                .getProvidedLocales(selectedBundle);
+        Set<Locale> locales = RBManager.getInstance(projectName).getProvidedLocales(selectedBundle);
         for (Locale l : locales) {
             String displayName = l.getDisplayName();
             if (displayName.equals(""))
@@ -171,8 +171,7 @@ public class ResourceBundleEntrySelectionDialog extends TitleAreaDialog {
         if (selectedBundle.trim().equals(""))
             return;
 
-        Set<Locale> locales = ResourceBundleManager.getManager(projectName)
-                .getProvidedLocales(selectedBundle);
+        Set<Locale> locales = RBManager.getInstance(projectName).getProvidedLocales(selectedBundle);
         Iterator<Locale> it = locales.iterator();
         String selectedLocale = cmbLanguage.getText();
         while (it.hasNext()) {
