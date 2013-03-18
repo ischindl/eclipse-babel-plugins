@@ -12,6 +12,7 @@ package org.eclipse.babel.tapiji.tools.rbmanager.model;
 
 import java.util.Collection;
 
+import org.eclipse.babel.core.message.manager.RBManager;
 import org.eclipse.babel.tapiji.tools.core.ui.ResourceBundleManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -43,7 +44,7 @@ public class VirtualResourceBundle {
     }
 
     public IPath getFullPath() {
-        return rbmanager.getRandomFile(resourcebundleId).getFullPath();
+        return RBManager.getInstance(rbmanager.getProject()).getRandomBundleFile(resourcebundleId).getFullPath();
     }
 
     public String getName() {
@@ -55,6 +56,6 @@ public class VirtualResourceBundle {
     }
 
     public IFile getRandomFile() {
-        return rbmanager.getRandomFile(resourcebundleId);
+        return RBManager.getInstance(rbmanager.getProject()).getRandomBundleFile(resourcebundleId);
     }
 }

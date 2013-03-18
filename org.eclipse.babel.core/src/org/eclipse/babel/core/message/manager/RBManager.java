@@ -11,6 +11,7 @@
 package org.eclipse.babel.core.message.manager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +34,7 @@ import org.eclipse.babel.core.refactoring.IRefactoringService;
 import org.eclipse.babel.core.util.FileUtils;
 import org.eclipse.babel.core.util.NameUtils;
 import org.eclipse.babel.core.util.PDEUtils;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -657,4 +659,18 @@ public final class RBManager {
         fireEditorChanged();
     }
 
+    public IFile getRandomBundleFile(String bundleName) {
+        try {
+            Collection<IMessagesBundle> messagesBundles = getMessagesBundleGroup(bundleName)
+                    .getMessagesBundles();
+            IMessagesBundle bundle = messagesBundles.iterator().next();
+            return FileUtils.getFile(bundle);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "getRandomBundleFile", e);
+        }
+        return null;
+    }
+
+
 }
+

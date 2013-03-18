@@ -706,10 +706,8 @@ public class PropertyKeySelectionTree extends Composite implements
             }
         }
 
-        ResourceBundleManager manager = ResourceBundleManager
-                .getManager(projectName);
         EditorUtils.openEditor(site.getPage(),
-                manager.getRandomFile(resourceBundle),
+                RBManager.getInstance(projectName).getRandomBundleFile(resourceBundle),
                 EditorUtils.RESOURCE_BUNDLE_EDITOR, key);
     }
 

@@ -207,7 +207,7 @@ public class ResourceBundleAuditor extends I18nRBAuditor {
                 IResource representative = rbmanager.getResourceBundleFile(
                         rbId, null);
                 if (representative == null) {
-                    representative = rbmanager.getRandomFile(rbId);
+                    representative = RBManager.getInstance(rbmanager.getProject()).getRandomBundleFile(rbId);
                 }
                 missingLanguages.add(new RBLocation((IFile) representative, 1,
                         2, language));

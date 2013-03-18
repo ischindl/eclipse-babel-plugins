@@ -19,11 +19,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.babel.core.message.IMessagesBundle;
 import org.eclipse.babel.core.message.IMessagesBundleGroup;
 import org.eclipse.babel.core.message.manager.IResourceDeltaListener;
 import org.eclipse.babel.core.message.manager.RBManager;
-import org.eclipse.babel.core.util.FileUtils;
 import org.eclipse.babel.core.util.NameUtils;
 import org.eclipse.babel.tapiji.tools.core.Logger;
 import org.eclipse.babel.tapiji.tools.core.model.IResourceBundleChangedListener;
@@ -581,20 +579,6 @@ public class ResourceBundleManager {
 
 		return isExcluded; // excludedResources.contains(new
 		// ResourceDescriptor(res));
-	}
-
-	public IFile getRandomFile(String bundleName) {
-        // TODO move to RBManager
-	    try {
-			Collection<IMessagesBundle> messagesBundles = RBManager
-					.getInstance(project).getMessagesBundleGroup(bundleName)
-					.getMessagesBundles();
-			IMessagesBundle bundle = messagesBundles.iterator().next();
-			return FileUtils.getFile(bundle);
-		} catch (Exception e) {
-			Logger.logError(e);
-		}
-		return null;
 	}
 
 	public static ResourceBundleManager getManager(String projectName) {

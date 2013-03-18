@@ -63,14 +63,12 @@ public class LanguageUtils {
      */
     public static void addLanguageToResourceBundle(IProject project,
             final String rbId, final Locale locale) {
-        ResourceBundleManager rbManager = ResourceBundleManager
-                .getManager(project);
 
         if (RBManager.getInstance(project).getProvidedLocales(rbId).contains(locale)) {
             return;
         }
 
-        final IResource file = rbManager.getRandomFile(rbId);
+        final IResource file = RBManager.getInstance(project).getRandomBundleFile(rbId);
         final IContainer c = ResourceUtils.getCorrespondingFolders(
                 file.getParent(), project);
 

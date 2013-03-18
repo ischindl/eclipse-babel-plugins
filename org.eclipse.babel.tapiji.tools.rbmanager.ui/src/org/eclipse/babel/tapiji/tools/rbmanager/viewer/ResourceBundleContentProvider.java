@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.babel.core.message.manager.RBManager;
 import org.eclipse.babel.tapiji.tools.core.model.IResourceBundleChangedListener;
 import org.eclipse.babel.tapiji.tools.core.model.manager.ResourceBundleChangedEvent;
 import org.eclipse.babel.tapiji.tools.core.ui.ResourceBundleManager;
@@ -358,13 +359,11 @@ public class ResourceBundleContentProvider implements ITreeContentProvider,
 
     @Override
     public void resourceBundleChanged(ResourceBundleChangedEvent event) {
-        ResourceBundleManager rbmanager = ResourceBundleManager
-                .getManager(event.getProject());
 
         switch (event.getType()) {
         case ResourceBundleChangedEvent.ADDED:
         case ResourceBundleChangedEvent.DELETED:
-            IResource res = rbmanager.getRandomFile(event.getBundle());
+            IResource res = RBManager.getInstance(event.getProject()).getRandomBundleFile(event.getBundle());
             IContainer hostContainer;
 
             if (res == null) {
