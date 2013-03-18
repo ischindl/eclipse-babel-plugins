@@ -607,6 +607,11 @@ public final class RBManager {
         return group != null && group.containsKey(key);
     }
     
+    public boolean isKeyIn(String bundleId, String key) {
+        IMessagesBundleGroup bGroup = getMessagesBundleGroup(bundleId);
+        return bGroup != null &&  bGroup.isKey(key);
+    }
+    
     public void addResourceBundleEntry(String resourceBundleId, String key,
             Locale locale, String message) {
 

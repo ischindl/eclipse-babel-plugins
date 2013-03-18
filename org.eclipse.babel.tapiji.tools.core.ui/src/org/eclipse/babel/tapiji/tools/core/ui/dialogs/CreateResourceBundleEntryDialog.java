@@ -419,7 +419,7 @@ public class CreateResourceBundleEntryDialog extends TitleAreaDialog {
             }
         }
 
-        if (!manager.isResourceExisting(selectedRB, selectedKey))
+        if (!RBManager.getInstance(projectName).isKeyIn(selectedRB, selectedKey))
             keyValid = true;
 
         if (selectedDefaultText.trim().length() > 0)

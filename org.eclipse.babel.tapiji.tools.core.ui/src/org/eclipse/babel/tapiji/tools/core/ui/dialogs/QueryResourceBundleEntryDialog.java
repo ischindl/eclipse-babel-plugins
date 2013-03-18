@@ -404,7 +404,7 @@ public class QueryResourceBundleEntryDialog extends TitleAreaDialog {
         if (selectedLocale != null)
             localeValid = true;
 
-        if (manager.isResourceExisting(selectedRB, selectedKey))
+        if (RBManager.getInstance(manager.getProject()).isKeyIn(selectedRB, selectedKey))
             keyValid = true;
 
         // print Validation summary

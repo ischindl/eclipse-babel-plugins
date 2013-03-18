@@ -401,7 +401,7 @@ public class ResourceBundleEntrySelectionDialog extends TitleAreaDialog {
         if (selectedLocale != null)
             localeValid = true;
 
-        if (ResourceBundleManager.getManager(projectName).isResourceExisting(
+        if (RBManager.getInstance(projectName).isKeyIn(
                 selectedRB, selectedKey))
             keyValid = true;
 

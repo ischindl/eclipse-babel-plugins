@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.babel.tapiji.tools.core.ui.dialogs;
 
+import org.eclipse.babel.core.message.manager.RBManager;
 import org.eclipse.babel.tapiji.tools.core.ui.ResourceBundleManager;
 import org.eclipse.babel.tapiji.tools.core.ui.utils.ResourceUtils;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -254,10 +255,7 @@ public class KeyRefactoringDialog extends TitleAreaDialog {
 
         String resourceBundle = config.getPreselectedBundle();
 
-        ResourceBundleManager manager = ResourceBundleManager.getManager(config
-                .getProjectName());
-
-        if (!manager.isResourceExisting(resourceBundle, selectedKey)) {
+        if (!RBManager.getInstance(config.getProjectName()).isKeyIn(resourceBundle, selectedKey)) {
             keyValid = true;
         }
         // print Validation summary

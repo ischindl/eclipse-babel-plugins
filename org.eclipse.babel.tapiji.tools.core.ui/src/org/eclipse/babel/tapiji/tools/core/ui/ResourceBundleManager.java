@@ -668,12 +668,6 @@ public class ResourceBundleManager {
 		}
 	}
 
-	public boolean isResourceExisting(String bundleId, String key) {
-	    // TODO move to RBManager
-		IMessagesBundleGroup bGroup = RBManager.getInstance(project).getMessagesBundleGroup(bundleId);
-		return bGroup != null &&  bGroup.isKey(key);
-	}
-
 	public Set<Locale> getProjectProvidedLocales() {
 		Set<Locale> locales = new HashSet<Locale>();
 
