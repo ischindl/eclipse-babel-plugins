@@ -31,8 +31,6 @@ import org.eclipse.babel.tapiji.tools.core.model.ResourceDescriptor;
 import org.eclipse.babel.tapiji.tools.core.model.manager.IStateLoader;
 import org.eclipse.babel.tapiji.tools.core.model.manager.ResourceBundleChangedEvent;
 import org.eclipse.babel.tapiji.tools.core.model.manager.ResourceExclusionEvent;
-import org.eclipse.babel.tapiji.tools.core.ui.analyzer.ResourceBundleDetectionVisitor;
-import org.eclipse.babel.tapiji.tools.core.util.FragmentProjectUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -40,7 +38,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -58,8 +55,8 @@ public class ResourceBundleManager {
 	/*** CONFIG SECTION ***/
 	private static boolean checkResourceExclusionRoot;
 
-	/*** MEMBER SECTION ***/
-	private static Map<IProject, ResourceBundleManager> rbmanagerByProject = new HashMap<IProject, ResourceBundleManager>();
+    /*** MEMBER SECTION ***/
+	private static final ResourceBundleManagerByProject holder = new ResourceBundleManagerByProject();
 
 	// project-specific
 	private final Map<String, Set<IResource>> resources = new HashMap<String, Set<IResource>>();
@@ -92,8 +89,20 @@ public class ResourceBundleManager {
 	private static IStateLoader stateLoader;
 
 	// Define private constructor
-	private ResourceBundleManager(IProject project) {
+	ResourceBundleManager(IProject project) {
 		this.project = project;
+
+		// check if persistant state has been loaded
+        if (!state_loaded) {
+            getStateLoader();
+            if (stateLoader != null) {
+                stateLoader.loadState();
+                state_loaded = true;
+                excludedResources = stateLoader.getExcludedResources();
+            } else {
+                Logger.logError("State-Loader uninitialized! Unable to restore project state.");
+            }
+        }
 
 		RBManager.getInstance(project).addResourceDeltaListener(
 				new IResourceDeltaListener() {
@@ -112,31 +121,7 @@ public class ResourceBundleManager {
 	}
 
 	public static ResourceBundleManager getManager(IProject project) {
-        // TODO create factory for ResourceBundleManager with this method
-		// check if persistant state has been loaded
-		if (!state_loaded) {
-			IStateLoader stateLoader = getStateLoader();
-			if (stateLoader != null) {
-				stateLoader.loadState();
-				state_loaded = true;
-				excludedResources = stateLoader.getExcludedResources();
-			} else {
-				Logger.logError("State-Loader uninitialized! Unable to restore project state.");
-			}
-		}
-
-		// set host-project
-		if (FragmentProjectUtils.isFragment(project)) {
-			project = FragmentProjectUtils.getFragmentHost(project);
-		}
-
-		ResourceBundleManager manager = rbmanagerByProject.get(project);
-		if (manager == null) {
-			manager = new ResourceBundleManager(project);
-			rbmanagerByProject.put(project, manager);
-			manager.detectResourceBundles();
-		}
-		return manager;
+	    return holder.getManager(project);
 	}
 
 	public static String getResourceBundleName(IResource res) {
@@ -254,22 +239,6 @@ public class ResourceBundleManager {
 		listeners.put(bundleName, l);
 	}
 
-	private void detectResourceBundles() {
-	    // TODO create factory for ResourceBundleManager with this method
-		try {
-			project.accept(new ResourceBundleDetectionVisitor(project));
-
-			IProject[] fragments = FragmentProjectUtils.lookupFragment(project);
-			if (fragments != null) {
-				for (IProject p : fragments) {
-					p.accept(new ResourceBundleDetectionVisitor(project));
-				}
-			}
-		} catch (CoreException e) {
-		    // TODO no empty catch suckers
-		}
-	}
-
 	public IProject getProject() {
 		return project;
 	}
@@ -285,25 +254,6 @@ public class ResourceBundleManager {
 		}
 
 		return returnList;
-	}
-
-	private static Set<IProject> getAllSupportedProjects() {
-        // TODO create factory for ResourceBundleManager with this method
-		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
-				.getProjects();
-		Set<IProject> projs = new HashSet<IProject>();
-
-		for (IProject p : projects) {
-			try {
-				if (p.isOpen() && p.hasNature(NATURE_ID)) {
-					projs.add(p);
-				}
-			} catch (CoreException e) {
-				// TODO Auto-generated catch block
-				Logger.logError(e);
-			}
-		}
-		return projs;
 	}
 
 	private boolean excludeSingleResource(IResource res) {
@@ -546,7 +496,7 @@ public class ResourceBundleManager {
 		IResource resource = res;
 
 		if (!state_loaded) {
-			IStateLoader stateLoader = getStateLoader();
+			getStateLoader();
 			if (stateLoader != null) {
 				stateLoader.loadState();
 			} else {
@@ -582,19 +532,7 @@ public class ResourceBundleManager {
 	}
 
 	public static ResourceBundleManager getManager(String projectName) {
-        // TODO create factory for ResourceBundleManager with this method
-		for (IProject p : getAllSupportedProjects()) {
-			if (p.getName().equalsIgnoreCase(projectName)) {
-				// check if the projectName is a fragment and return the manager
-				// for the host
-				if (FragmentProjectUtils.isFragment(p)) {
-					return getManager(FragmentProjectUtils.getFragmentHost(p));
-				} else {
-					return getManager(p);
-				}
-			}
-		}
-		return null;
+	    return holder.getManager(projectName);
 	}
 
 	public IFile getResourceBundleFile(String resourceBundle, Locale l) {
@@ -635,7 +573,7 @@ public class ResourceBundleManager {
 		exclusionListeners.add(listener);
 	}
 
-	private void unregisterResourceExclusionListener(
+	void unregisterResourceExclusionListener(
 			IResourceExclusionListener listener) {
 		exclusionListeners.remove(listener);
 	}
@@ -647,9 +585,7 @@ public class ResourceBundleManager {
 
 	public static void unregisterResourceExclusionListenerFromAllManagers(
 			IResourceExclusionListener excludedResource) {
-		for (ResourceBundleManager mgr : rbmanagerByProject.values()) {
-			mgr.unregisterResourceExclusionListener(excludedResource);
-		}
+	    holder.unregisterResourceExclusionListenerFromAllManagers(excludedResource);
 	}
 
 	public Set<Locale> getProjectProvidedLocales() {
@@ -673,7 +609,7 @@ public class ResourceBundleManager {
 		return locales;
 	}
 
-	private static IStateLoader getStateLoader() {
+	private static void getStateLoader() {
 		if (stateLoader == null) {
 
 			IExtensionPoint extp = Platform.getExtensionRegistry()
@@ -691,13 +627,10 @@ public class ResourceBundleManager {
 				}
 			}
 		}
-
-		return stateLoader;
-
 	}
 
 	static void saveManagerState() {
-		IStateLoader stateLoader = getStateLoader();
+		getStateLoader();
 		if (stateLoader != null) {
 			stateLoader.saveState();
 		}
