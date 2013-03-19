@@ -28,7 +28,9 @@ import org.eclipse.babel.tapiji.tools.core.model.IResourceBundleChangedListener;
 import org.eclipse.babel.tapiji.tools.core.model.IResourceDescriptor;
 import org.eclipse.babel.tapiji.tools.core.model.IResourceExclusionListener;
 import org.eclipse.babel.tapiji.tools.core.model.PersistantResourceDescriptors;
+import org.eclipse.babel.tapiji.tools.core.model.ResourceBundleChangedListenerSupport;
 import org.eclipse.babel.tapiji.tools.core.model.ResourceDescriptor;
+import org.eclipse.babel.tapiji.tools.core.model.ResourceExclusionListenerSupport;
 import org.eclipse.babel.tapiji.tools.core.model.manager.ResourceBundleChangedEvent;
 import org.eclipse.babel.tapiji.tools.core.model.manager.ResourceExclusionEvent;
 import org.eclipse.core.resources.IFile;
@@ -60,9 +62,9 @@ public class ResourceBundleManager {
 
 	private final Map<String, String> bundleNames = new HashMap<String, String>();
 
-	private final Map<String, List<IResourceBundleChangedListener>> listeners = new HashMap<String, List<IResourceBundleChangedListener>>();
+	private final ResourceBundleChangedListenerSupport listenersByBundle = new ResourceBundleChangedListenerSupport();
 
-	private final List<IResourceExclusionListener> exclusionListeners = new ArrayList<IResourceExclusionListener>();
+	private final ResourceExclusionListenerSupport exclusionListeners = new ResourceExclusionListenerSupport();
 
 	// global
     private static final PersistantResourceDescriptors excludedResources = new PersistantResourceDescriptors();
@@ -189,35 +191,17 @@ public class ResourceBundleManager {
 
 	private void fireResourceBundleChangedEvent(String bundleName,
 			ResourceBundleChangedEvent event) {
-		List<IResourceBundleChangedListener> l = listeners.get(bundleName);
-
-		if (l == null) {
-			return;
-		}
-
-		for (IResourceBundleChangedListener listener : l) {
-			listener.resourceBundleChanged(event);
-		}
+	    listenersByBundle.fireResourceBundleChangedEvent(bundleName, event);
 	}
 
 	public void registerResourceBundleChangeListener(String bundleName,
 			IResourceBundleChangedListener listener) {
-		List<IResourceBundleChangedListener> l = listeners.get(bundleName);
-		if (l == null) {
-			l = new ArrayList<IResourceBundleChangedListener>();
-		}
-		l.add(listener);
-		listeners.put(bundleName, l);
+        listenersByBundle.registerResourceBundleChangeListener(bundleName, listener);
 	}
 
 	public void unregisterResourceBundleChangeListener(String bundleName,
 			IResourceBundleChangedListener listener) {
-		List<IResourceBundleChangedListener> l = listeners.get(bundleName);
-		if (l == null) {
-			return;
-		}
-		l.remove(listener);
-		listeners.put(bundleName, l);
+        listenersByBundle.unregisterResourceBundleChangeListener(bundleName, listener);
 	}
 
 	public IProject getProject() {
@@ -247,7 +231,7 @@ public class ResourceBundleManager {
 		excludedResources.add(rd);
 		Collection<IResource> changedExclusions = new HashSet<IResource>();
 		changedExclusions.add(res);
-		fireResourceExclusionEvent(new ResourceExclusionEvent(changedExclusions));
+		fireResourceExclusionEvent(changedExclusions);
 
 		// Check if the excluded resource represents a resource-bundle
 		if (org.eclipse.babel.tapiji.tools.core.ui.utils.RBFileUtils
@@ -462,15 +446,12 @@ public class ResourceBundleManager {
 				}
 			}
 
-			fireResourceExclusionEvent(new ResourceExclusionEvent(
-					changedResources));
+			fireResourceExclusionEvent(changedResources);
 		}
 	}
 
-	private void fireResourceExclusionEvent(ResourceExclusionEvent event) {
-		for (IResourceExclusionListener listener : exclusionListeners) {
-			listener.exclusionChanged(event);
-		}
+	private void fireResourceExclusionEvent(Collection<IResource> exclResources) {
+	    exclusionListeners.fireResourceExclusionEvent(new ResourceExclusionEvent(exclResources));
 	}
 
 	public static boolean isResourceExcluded(IResource res) {
@@ -549,7 +530,7 @@ public class ResourceBundleManager {
 
 	void unregisterResourceExclusionListener(
 			IResourceExclusionListener listener) {
-		exclusionListeners.remove(listener);
+        exclusionListeners.remove(listener);
 	}
 
 	public boolean isResourceExclusionListenerRegistered(
