@@ -10,13 +10,13 @@
  ******************************************************************************/
 package org.eclipse.babel.tapiji.tools.core.ui;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.babel.tapiji.tools.core.Logger;
-import org.eclipse.babel.tapiji.tools.core.model.IResourceExclusionListener;
 import org.eclipse.babel.tapiji.tools.core.ui.analyzer.ResourceBundleDetectionVisitor;
 import org.eclipse.babel.tapiji.tools.core.util.FragmentProjectUtils;
 import org.eclipse.core.resources.IProject;
@@ -24,14 +24,13 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 
 /**
- * Holds and creates ResourceBundleManager per IProject.
- * This is a helper class of ResourceBundleManager's static content.
+ * Holds and creates ResourceBundleManager per project.
  */
 public class ResourceBundleManagerByProject {
 
     private final Map<IProject, ResourceBundleManager> rbmanagerByProject = new HashMap<IProject, ResourceBundleManager>();
 
-    ResourceBundleManager getManager(IProject project) {
+    public ResourceBundleManager getManager(IProject project) {
         // set host-project
         if (FragmentProjectUtils.isFragment(project)) {
             project = FragmentProjectUtils.getFragmentHost(project);
@@ -61,7 +60,7 @@ public class ResourceBundleManagerByProject {
         }
     }
 
-    ResourceBundleManager getManager(String projectName) {
+    public ResourceBundleManager getManager(String projectName) {
         for (IProject p : getAllSupportedProjects()) {
             if (p.getName().equalsIgnoreCase(projectName)) {
                 // check if the projectName is a fragment and return the manager for the host
@@ -91,10 +90,8 @@ public class ResourceBundleManagerByProject {
         return projs;
     }
 
-    void unregisterResourceExclusionListenerFromAllManagers(IResourceExclusionListener excludedResource) {
-        for (ResourceBundleManager mgr : rbmanagerByProject.values()) {
-            mgr.unregisterResourceExclusionListener(excludedResource);
-        }
+    public Collection<ResourceBundleManager> allManagers() {
+        return rbmanagerByProject.values();
     }
 
 }

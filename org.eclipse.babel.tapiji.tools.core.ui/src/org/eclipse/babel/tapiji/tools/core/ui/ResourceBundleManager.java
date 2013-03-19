@@ -27,8 +27,8 @@ import org.eclipse.babel.tapiji.tools.core.Logger;
 import org.eclipse.babel.tapiji.tools.core.model.IResourceBundleChangedListener;
 import org.eclipse.babel.tapiji.tools.core.model.IResourceDescriptor;
 import org.eclipse.babel.tapiji.tools.core.model.IResourceExclusionListener;
+import org.eclipse.babel.tapiji.tools.core.model.PersistantResourceDescriptors;
 import org.eclipse.babel.tapiji.tools.core.model.ResourceDescriptor;
-import org.eclipse.babel.tapiji.tools.core.model.manager.IStateLoader;
 import org.eclipse.babel.tapiji.tools.core.model.manager.ResourceBundleChangedEvent;
 import org.eclipse.babel.tapiji.tools.core.model.manager.ResourceExclusionEvent;
 import org.eclipse.core.resources.IFile;
@@ -39,11 +39,8 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
@@ -56,7 +53,7 @@ public class ResourceBundleManager {
 	private static boolean checkResourceExclusionRoot;
 
     /*** MEMBER SECTION ***/
-	private static final ResourceBundleManagerByProject holder = new ResourceBundleManagerByProject();
+    private static final ResourceBundleManagerByProject rbmanagerByProject = new ResourceBundleManagerByProject();
 
 	// project-specific
 	private final Map<String, Set<IResource>> resources = new HashMap<String, Set<IResource>>();
@@ -68,8 +65,7 @@ public class ResourceBundleManager {
 	private final List<IResourceExclusionListener> exclusionListeners = new ArrayList<IResourceExclusionListener>();
 
 	// global
-	private static Set<IResourceDescriptor> excludedResources = new HashSet<IResourceDescriptor>();
-
+    private static final PersistantResourceDescriptors excludedResources = new PersistantResourceDescriptors();
 	private static final Map<String, Set<IResource>> allBundles = new HashMap<String, Set<IResource>>();
 
 	// private static IResourceChangeListener changelistener; //
@@ -83,26 +79,11 @@ public class ResourceBundleManager {
 	/* Host project */
 	private final IProject project;
 
-	/** State-Serialization Information **/
-	private static boolean state_loaded;
-
-	private static IStateLoader stateLoader;
-
 	// Define private constructor
 	ResourceBundleManager(IProject project) {
 		this.project = project;
 
-		// check if persistant state has been loaded
-        if (!state_loaded) {
-            getStateLoader();
-            if (stateLoader != null) {
-                stateLoader.loadState();
-                state_loaded = true;
-                excludedResources = stateLoader.getExcludedResources();
-            } else {
-                Logger.logError("State-Loader uninitialized! Unable to restore project state.");
-            }
-        }
+		excludedResources.load();
 
 		RBManager.getInstance(project).addResourceDeltaListener(
 				new IResourceDeltaListener() {
@@ -121,7 +102,7 @@ public class ResourceBundleManager {
 	}
 
 	public static ResourceBundleManager getManager(IProject project) {
-	    return holder.getManager(project);
+	    return rbmanagerByProject.getManager(project);
 	}
 
 	public static String getResourceBundleName(IResource res) {
@@ -495,14 +476,7 @@ public class ResourceBundleManager {
 	public static boolean isResourceExcluded(IResource res) {
 		IResource resource = res;
 
-		if (!state_loaded) {
-			getStateLoader();
-			if (stateLoader != null) {
-				stateLoader.loadState();
-			} else {
-				Logger.logError("State-Loader uninitialized! Unable to restore state.");
-			}
-		}
+		excludedResources.load();
 
 		boolean isExcluded = false;
 
@@ -532,7 +506,7 @@ public class ResourceBundleManager {
 	}
 
 	public static ResourceBundleManager getManager(String projectName) {
-	    return holder.getManager(projectName);
+	    return rbmanagerByProject.getManager(projectName);
 	}
 
 	public IFile getResourceBundleFile(String resourceBundle, Locale l) {
@@ -585,7 +559,9 @@ public class ResourceBundleManager {
 
 	public static void unregisterResourceExclusionListenerFromAllManagers(
 			IResourceExclusionListener excludedResource) {
-	    holder.unregisterResourceExclusionListenerFromAllManagers(excludedResource);
+        for (ResourceBundleManager mgr : rbmanagerByProject.allManagers()) {
+            mgr.unregisterResourceExclusionListener(excludedResource);
+        }
 	}
 
 	public Set<Locale> getProjectProvidedLocales() {
@@ -609,31 +585,8 @@ public class ResourceBundleManager {
 		return locales;
 	}
 
-	private static void getStateLoader() {
-		if (stateLoader == null) {
-
-			IExtensionPoint extp = Platform.getExtensionRegistry()
-					.getExtensionPoint(
-							"org.eclipse.babel.tapiji.tools.core"
-									+ ".stateLoader");
-			IConfigurationElement[] elements = extp.getConfigurationElements();
-
-			if (elements.length != 0) {
-				try {
-					stateLoader = (IStateLoader) elements[0]
-							.createExecutableExtension("class");
-				} catch (CoreException e) {
-					Logger.logError(e);
-				}
-			}
-		}
-	}
-
 	static void saveManagerState() {
-		getStateLoader();
-		if (stateLoader != null) {
-			stateLoader.saveState();
-		}
+	    excludedResources.save();
 	}
 
 }
