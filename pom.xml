@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- 
+<!--
 
 Copyright (c) 2012 Martin Reiterer, Stefan Strobl
 
-All rights reserved. This program and the accompanying materials 
-are made available under the terms of the Eclipse Public License 
-v1.0 which accompanies this distribution, and is available at 
-http://www.eclipse.org/legal/epl-v10.html 
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License
+v1.0 which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
 
 Contributors:
 	Martin Reiterer - setup of tycho build for babel tools
@@ -30,14 +30,14 @@ Contributors:
   </prerequisites>
 
   <properties>
-    <tycho-version>0.16.0</tycho-version>
+    <tycho-version>0.18.1</tycho-version>
   </properties>
   <repositories>
     <!-- configure p2 repository to resolve against -->
     <repository>
-      <id>indigo</id>
+      <id>kepler</id>
       <layout>p2</layout>
-      <url>http://download.eclipse.org/releases/indigo</url>
+      <url>http://download.eclipse.org/releases/kepler</url>
     </repository>
   </repositories>
 
@@ -78,13 +78,14 @@ Contributors:
         <artifactId>target-platform-configuration</artifactId>
         <version>${tycho-version}</version>
         <configuration>
-          <target>
+<!--           <target>
             <artifact>
               <groupId>${project.groupId}</groupId>
               <artifactId>org.eclipse.babel.tapiji.tools.target</artifactId>
               <version>${project.version}</version>
             </artifact>
-          </target>
+          </target>  -->
+          <resolver>p2</resolver>
           <!-- configure the p2 target environments for multi-platform build -->
           <environments>
             <environment>
@@ -137,7 +138,7 @@ Contributors:
                   <requirement>
                     <type>eclipse-plugin</type>
                     <id>org.eclipse.babel.editor.swt.compat</id>
-                    <versionRange>0.9.0</versionRange>
+                    <versionRange>0.0.0</versionRange>
                   </requirement>
                   <requirement>
                     <type>eclipse-plugin</type>
@@ -172,7 +173,7 @@ Contributors:
                   <requirement>
                     <type>eclipse-plugin</type>
                     <id>org.eclipse.jdt.core</id>
-                    <versionRange>3.2.0</versionRange>
+                    <versionRange>0.0.0</versionRange>
                   </requirement>
                   <requirement>
                     <type>eclipse-plugin</type>
@@ -197,7 +198,7 @@ Contributors:
                   <requirement>
                     <type>eclipse-plugin</type>
                     <id>org.eclipse.ui.forms</id>
-                    <versionRange>3.5.101</versionRange>
+                    <versionRange>0.0.0</versionRange>
                   </requirement>
                 </extraRequirements>
               </dependency-resolution>
