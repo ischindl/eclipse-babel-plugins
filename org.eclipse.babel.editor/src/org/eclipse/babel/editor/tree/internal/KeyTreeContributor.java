@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.babel.editor.tree.internal;
 
-import java.lang.reflect.Constructor;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.logging.Level;
@@ -22,22 +21,20 @@ import org.eclipse.babel.core.message.tree.internal.AbstractKeyTreeModel;
 import org.eclipse.babel.core.message.tree.internal.IKeyTreeModelListener;
 import org.eclipse.babel.core.message.tree.internal.KeyTreeNode;
 import org.eclipse.babel.editor.IMessagesEditorChangeListener;
-import org.eclipse.babel.editor.builder.Builder;
 import org.eclipse.babel.editor.internal.AbstractMessagesEditor;
 import org.eclipse.babel.editor.internal.MessagesEditorChangeAdapter;
 import org.eclipse.babel.editor.internal.MessagesEditorMarkers;
 import org.eclipse.babel.editor.tree.IKeyTreeContributor;
-import org.eclipse.babel.editor.tree.actions.AbstractRenameKeyAction;
 import org.eclipse.babel.editor.tree.actions.AddKeyAction;
 import org.eclipse.babel.editor.tree.actions.DeleteKeyAction;
 import org.eclipse.babel.editor.tree.actions.RefactorKeyAction;
+import org.eclipse.babel.editor.tree.actions.SearchKeyAction;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -55,15 +52,13 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 
 /**
  * @author Pascal Essiembre
  *
  */
 public class KeyTreeContributor implements IKeyTreeContributor {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(KeyTreeContributor.class.getName());
 
     private AbstractMessagesEditor editor;
@@ -359,6 +354,9 @@ public class KeyTreeContributor implements IKeyTreeContributor {
         MenuManager menuManager = new MenuManager();
         Menu menu = menuManager.createContextMenu(tree);
 
+        // Search
+        final IAction searchAction = new SearchKeyAction(editor, treeViewer);
+        menuManager.add(searchAction);
         // Add
         final IAction addAction = new AddKeyAction(editor, treeViewer);
         menuManager.add(addAction);
@@ -372,7 +370,7 @@ public class KeyTreeContributor implements IKeyTreeContributor {
 
         menuManager.update(true);
         menuManager.addMenuListener(new IMenuListener() {
-			
+
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				// TODO Auto-generated method stub
